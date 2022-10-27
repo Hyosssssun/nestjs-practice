@@ -19,3 +19,14 @@ it('should return empty list', async () => {
   const response = await request(app.getHttpServer()).get('/movies').send();
   expect(response.body).toEqual([]);
 });
+
+it('should return one movie in the list', async () => {
+  await request(app.getHttpServer()).post('/movies').send({
+    title: 'Harry Potter',
+    year: 1922,
+    genres: 'Fantasy',
+  });
+  const response = await request(app.getHttpServer()).get('/movies').send();
+  console.log(response.body);
+  expect(response.body).toHaveLength(1);
+});
