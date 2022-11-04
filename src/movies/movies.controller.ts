@@ -7,11 +7,32 @@ import {
   Post,
   Patch,
   Query,
+  UsePipes,
+  PipeTransform,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entities/movie.entity';
 import { MoviesService } from './movies.service';
+
+class MoviePipe implements PipeTransform {
+  transform(value: any) {
+    if (typeof value.title !== 'string') {
+      throw new BadRequestException();
+    }
+    if (typeof value.year !== 'number') {
+      throw new BadRequestException();
+    }
+    if (!Array.isArray(value.genres)) {
+      throw new BadRequestException();
+    }
+    if (value.genres.some((genre) => typeof genre !== 'string')) {
+      throw new BadRequestException();
+    }
+    return value;
+  }
+}
 
 @Controller('movies')
 export class MoviesController {
@@ -33,6 +54,7 @@ export class MoviesController {
   }
 
   @Post()
+  @UsePipes(new MoviePipe())
   createOne(@Body() movieData: CreateMovieDto) {
     return this.movieService.createOne(movieData);
   }
