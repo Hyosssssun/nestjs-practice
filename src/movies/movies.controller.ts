@@ -10,6 +10,7 @@ import {
   UsePipes,
   PipeTransform,
   BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -49,7 +50,7 @@ export class MoviesController {
   }
 
   @Get('/:id')
-  getOne(@Param('id') movieId: number) {
+  getOne(@Param('id', ParseIntPipe) movieId: number) {
     return this.movieService.getOne(movieId);
   }
 
@@ -60,12 +61,15 @@ export class MoviesController {
   }
 
   @Patch('/:id')
-  updateOne(@Param('id') movieId: number, @Body() updatedData: UpdateMovieDto) {
+  updateOne(
+    @Param('id', ParseIntPipe) movieId: number,
+    @Body() updatedData: UpdateMovieDto,
+  ) {
     return this.movieService.updateOne(movieId, updatedData);
   }
 
   @Delete('/:id')
-  deleteOne(@Param('id') movieId: number) {
+  deleteOne(@Param('id', ParseIntPipe) movieId: number) {
     return this.movieService.deleteOne(movieId);
   }
 }

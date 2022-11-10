@@ -28,13 +28,15 @@ it('should return empty list', async () => {
 });
 
 it('should return one movie in the list', async () => {
-  await request(app.getHttpServer())
+  const req = await request(app.getHttpServer())
     .post('/movies')
     .send({
       title: 'Harry Potter',
       year: 1922,
       genres: ['Fantasy'],
     });
+  expect(req.statusCode).toBe(201);
+
   const expected = [
     {
       id: 1,
@@ -49,7 +51,7 @@ it('should return one movie in the list', async () => {
   expect(response.body).toEqual(expected);
 });
 
-it('should return bad request error message', async () => {
+it('should return bad request error message when it gets wrong type of title', async () => {
   const req = await request(app.getHttpServer())
     .post('/movies')
     .send({
@@ -60,7 +62,7 @@ it('should return bad request error message', async () => {
 
   expect(req.statusCode).toBe(400);
 });
-it('should return bad request error message', async () => {
+it('should return bad request error message when it gets wrong type of genres', async () => {
   const req = await request(app.getHttpServer())
     .post('/movies')
     .send({
@@ -70,4 +72,46 @@ it('should return bad request error message', async () => {
     });
 
   expect(req.statusCode).toBe(400);
+});
+
+it('should return bad request error when there is wrong param passed', async () => {
+  const req = await request(app.getHttpServer())
+    .patch('/movies/hi')
+    .send({
+      title: 'newName',
+      year: 2022,
+      genres: ['Action'],
+    });
+
+  expect(req.statusCode).toBe(400);
+});
+
+it('should return updated movie in the list', async () => {
+  const req = await request(app.getHttpServer())
+    .patch('/movies/1')
+    .send({
+      title: 'newName',
+      year: 2022,
+      genres: ['Action'],
+    });
+
+  expect(req.statusCode).toBe(200);
+
+  const expected = {
+    id: 1,
+    title: 'newName',
+    year: 2022,
+    genres: ['Action'],
+  };
+
+  const res = await request(app.getHttpServer()).get('/movies/1').send();
+
+  expect(res.body).toEqual(expected);
+});
+
+it('should return empty list after deleting the movie', async () => {
+  const req = await request(app.getHttpServer()).delete('/movies/1').send();
+  expect(req.statusCode).toBe(200);
+  const res = await request(app.getHttpServer()).get('/movies').send();
+  expect(res.body).toEqual([]);
 });
